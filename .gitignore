@@ -1,0 +1,11 @@
+.DS_Store
+**/.gradle/
+**/build/
+**/local.properties
+**/.idea/
+**/.venv/
+**/__pycache__/
+**/*.py[cod]
+**/results/
+**/sessions/
+**/camera_calibration.json

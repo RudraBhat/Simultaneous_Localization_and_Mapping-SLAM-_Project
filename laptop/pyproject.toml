@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ie415-phone-laptop-slam"
+version = "1.0.0"
+description = "Android phone capture and Python ArUco-corrected visual-inertial SLAM pipeline"
+requires-python = ">=3.11"
+dependencies = [
+  "numpy>=2.1,<3",
+  "opencv-contrib-python-headless>=4.10,<6",
+  "scipy>=1.14,<2",
+  "matplotlib>=3.9,<4",
+]
+
+[project.scripts]
+ie415-slam = "slam_pipeline.cli:main"
+
+[tool.setuptools]
+packages = ["slam_pipeline"]
