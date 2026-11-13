@@ -30,6 +30,8 @@ The APK is written to android-app/app/build/outputs/apk/debug/app-debug.apk. Ins
 
     adb install -r app/build/outputs/apk/debug/app-debug.apk
 
+A prebuilt debug APK is also included at [android-app/releases/IE415_SLAM_Capture-debug.apk](android-app/releases/IE415_SLAM_Capture-debug.apk) for direct download from the project repository.
+
 Open IE415 SLAM Capture, grant camera access, and wait for ARCore tracking to start. Tap Start, walk through the marked room, tap Stop, then tap Export ZIP and choose a location. The app samples camera images at about 10 Hz and logs IMU readings as they arrive. Keep one rear-camera mode active for a whole experiment.
 
 ## Python laptop setup
