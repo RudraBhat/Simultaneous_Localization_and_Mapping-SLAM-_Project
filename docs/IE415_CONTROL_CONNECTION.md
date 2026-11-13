@@ -52,7 +52,7 @@ Every run can be processed twice:
 1. ARCore motion only.
 2. ARCore motion corrected by known ArUco map observations.
 
-The report computes ATE RMSE, mean position error, endpoint error, and drift per metre when an independent ground-truth CSV is supplied. The experiment set includes a simple walk, marker-loss period, closed loop, repeat run using the stored map, and one difficult condition. For a fair claim, retain at least one surveyed reference point or route measurement that is not used as a correction input.
+The report computes ATE RMSE, mean position error, endpoint error, and drift per metre when an independent ground-truth CSV is supplied. It also reports tracking coverage, mapped-marker observation rate, and estimation processing rate. The experiment set includes a simple walk, marker-loss period, closed loop, repeat run using the stored map, and one difficult condition. For a fair claim, retain at least one surveyed reference point or route measurement that is not used as a correction input.
 
 ## Scope and attribution
 

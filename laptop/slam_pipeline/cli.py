@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from .calibration import calibrate_chessboard, generate_chessboard
+from .diagnostics import inspect_session
 from .demo import create_synthetic_session
 from .generate_markers import generate_markers
 from .map_builder import build_map_from_first_run
@@ -34,6 +35,15 @@ def build_parser() -> argparse.ArgumentParser:
     process.add_argument("--out", type=Path, required=True, help="Directory for trajectories and report.")
     process.add_argument("--calibration", type=Path, help="Optional OpenCV camera calibration JSON.")
     process.add_argument("--annotate-every", type=int, default=10, help="Save an overlay every N frames.")
+
+    inspect = subparsers.add_parser("inspect", help="Check a phone recording before running SLAM.")
+    _add_session_argument(inspect)
+    inspect.add_argument(
+        "--workdir",
+        type=Path,
+        default=Path("../work/inspect"),
+        help="Folder used to extract a ZIP for inspection (default: ../work/inspect).",
+    )
 
     calibrate = subparsers.add_parser("calibrate", help="Estimate camera intrinsics from chessboard images.")
     calibrate.add_argument("--images", type=Path, required=True, help="Folder containing calibration images.")
@@ -90,6 +100,18 @@ def main(argv: list[str] | None = None) -> int:
             )
             print(json.dumps(summary, indent=2))
             print("Open " + str(args.out / "index.html") + " to view the run report.")
+            return 0
+
+        if args.command == "inspect":
+            session_dir = _session_directory(args.session, args.workdir)
+            summary = inspect_session(session_dir)
+            print(json.dumps(summary, indent=2))
+            for note in summary["notes"]:
+                print("Note: " + str(note))
+            if summary["warnings"]:
+                print("Review the warnings before processing this run.")
+            else:
+                print("The recording passed the basic capture checks.")
             return 0
 
         if args.command == "calibrate":

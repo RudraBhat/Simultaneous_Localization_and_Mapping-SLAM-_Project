@@ -53,11 +53,11 @@ The estimator state here is the camera pose and a 6×6 pose covariance. ARCore i
 | Marker detection and unique IDs | OpenCV ArUco dictionary detection | Annotated images and detected IDs in `marker_observations.csv` |
 | Marker pose relative to camera | Per-tag `T_camera_marker` from image corners and camera intrinsics | `relative_marker_poses_json` in `marker_observations.csv` |
 | Continuous trajectory | ARCore camera motion, including intervals without mapped tags | Baseline and corrected trajectory CSVs |
-| Construct or load a marker map | JSON surveyed map plus exploratory-run map builder | `marker_map.json`; measure real marker positions and orientations |
+| Construct or load a marker map | Validated JSON map plus exploratory-run map builder | Eight-tag, two-wall example map; replace its hypothetical coordinates with the measured room survey |
 | Trajectory relative to map | Surveyed marker poses anchor the ARCore session | XY/3D plots and browser report |
 | Repeated marker constraint | Six-DoF pose EKF update; mapped-marker relocalization after tracking loss | Accepted/rejected updates and correction magnitudes in observation CSV |
 | Baseline comparison | Aligned ARCore trajectory versus marker-corrected trajectory | Compare with independent ground truth; synthetic demo only checks software behavior |
-| Quantitative evaluation | ATE RMSE, mean position error, endpoint error, and drift per metre | Requires real ground-truth measurements before reporting physical accuracy |
+| Quantitative evaluation | ATE RMSE, mean position error, endpoint error, drift per metre, marker observation rate, tracking coverage, and processing rate | Requires real ground-truth measurements before reporting physical accuracy |
 
 ## Experimental protocol
 
@@ -83,7 +83,7 @@ For each run, preserve the raw phone ZIP, map, calibration, ground-truth method,
 | M6 | Drift correction and baseline comparison | Implemented; synthetic demo available; real comparative evidence pending |
 | M7 | Required room experiments, final analysis, report, presentation, demonstration video | Requires the team's physical data and final course deliverables |
 
-The repository includes source and build instructions, a representative synthetic dataset generator, example marker map and ground truth, course-method documentation, and a report generator. Before final submission, add at least one real representative dataset and metadata, measured map/calibration files, the five experiment results, technical report, presentation, and demonstration video.
+The repository includes source and build instructions, a capture preflight command, a representative synthetic dataset generator, an eight-marker example map, experiment and phone-run checklists, a report template, course-method documentation, and a report generator. Before final submission, add at least one real representative dataset and metadata, measured map/calibration files, the five experiment results, completed technical report, presentation, and demonstration video.
 
 ## Scope and limitations
 

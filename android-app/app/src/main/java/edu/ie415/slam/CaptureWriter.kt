@@ -32,6 +32,14 @@ class CaptureWriter(
     var frameCount: Int = 0
         private set
 
+    @Volatile
+    var accelerometerSampleCount: Int = 0
+        private set
+
+    @Volatile
+    var gyroscopeSampleCount: Int = 0
+        private set
+
     var latestSessionDir: File? = null
         private set
 
@@ -63,6 +71,8 @@ class CaptureWriter(
         latestSessionDir = runDir
         lastImageTimestampNs = 0L
         frameCount = 0
+        accelerometerSampleCount = 0
+        gyroscopeSampleCount = 0
         isRecording = true
         statusConsumer("Recording session " + runId)
     }
@@ -150,6 +160,11 @@ class CaptureWriter(
         ).joinToString(",")
         imuWriter?.write(row)
         imuWriter?.newLine()
+        if (label == "accelerometer") {
+            accelerometerSampleCount += 1
+        } else {
+            gyroscopeSampleCount += 1
+        }
     }
 
     @Synchronized
@@ -172,7 +187,9 @@ class CaptureWriter(
 
     fun latestSessionDescription(): String {
         val folder = latestSessionDir?.name ?: "none"
-        return "Session " + folder + ": " + frameCount + " camera frames. Export its ZIP to the laptop."
+        return "Session " + folder + ": " + frameCount + " camera frames, " +
+            accelerometerSampleCount + " accelerometer samples, " +
+            gyroscopeSampleCount + " gyroscope samples. Export its ZIP to the laptop."
     }
 
     fun suggestedZipName(): String {

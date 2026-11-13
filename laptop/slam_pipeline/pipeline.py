@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import json
 import math
+import time
 from pathlib import Path
 
 import cv2
@@ -150,6 +151,7 @@ def process_session(
     calibration_path: Path | None = None,
     annotate_every: int = 10,
 ) -> dict[str, object]:
+    processing_started = time.perf_counter()
     session_dir = session_dir.resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     marker_map = MarkerMap.load(marker_map_path)
@@ -317,21 +319,28 @@ def process_session(
     imu_summary = read_imu_summary(session_dir)
     time_sync = estimate_time_offset(session_dir, frames)
     observed_frames = sum(1 for report in reports if report.get("used_ids"))
+    tracking_frames = sum(1 for frame in frames if frame.tracking_state.upper() == "TRACKING")
+    duration_s = max((frames[-1].timestamp_ns - frames[0].timestamp_ns) / 1e9, 0.0)
+    estimation_runtime_s = time.perf_counter() - processing_started
     summary: dict[str, object] = {
         "session": session_dir.name,
         "frames": len(frames),
-        "duration_s": round((frames[-1].timestamp_ns - frames[0].timestamp_ns) / 1e9, 3),
+        "duration_s": round(duration_s, 3),
+        "arcore_tracking_rate": round(tracking_frames / len(frames), 4),
         "marker_observed_frames": observed_frames,
+        "mapped_marker_observation_rate": round(observed_frames / len(frames), 4),
         "first_anchor_frame": anchor_index,
         "marker_updates_accepted": marker_updates_accepted,
         "marker_updates_rejected": marker_updates_rejected,
         "mapped_markers": len(marker_map.transforms),
         "imu": imu_summary,
         "time_sync": time_sync,
+        "estimation_runtime_s": round(estimation_runtime_s, 3),
+        "estimation_processing_fps": round(len(frames) / max(estimation_runtime_s, 1e-9), 2),
         "trajectory_metrics": metrics,
         "world_from_arcore": world_from_arcore.tolist(),
         "calibration_source": str(calibration_path) if calibration_path else "ARCore image intrinsics; zero distortion",
-        "note": "Trajectory alignment uses the first valid surveyed marker observation.",
+        "note": "Trajectory alignment uses the first valid mapped-marker observation; physical accuracy depends on map survey quality.",
     }
     (output_dir / "summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     (output_dir / "time_sync.json").write_text(json.dumps(time_sync, indent=2) + "\n", encoding="utf-8")

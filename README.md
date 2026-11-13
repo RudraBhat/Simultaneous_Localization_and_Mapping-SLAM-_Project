@@ -53,7 +53,7 @@ Print the files at the same physical size. Measure the black marker square edge 
 
 ## Map and calibration
 
-Copy marker_map.example.json and edit the marker IDs, physical size, positions, and rotations to match the room. Distances use metres. T_world_marker maps the local printed marker frame into the room frame. The example assumes a wall marker's local +z points out from the print and into the room; markers on a second wall need a corresponding rotation.
+Copy marker_map.example.json and edit the marker IDs, physical size, positions, and rotations to match the room. Distances use metres. T_world_marker maps the local printed marker frame into the room frame. The eight entries describe a hypothetical 4 m by 3 m room with tags on two opposite walls; they are illustrative coordinates and must be replaced with measurements from your room. The local marker +z axis points out from each print toward the room, and tag orientation must be represented correctly for each wall.
 
 For a measured camera distortion model, make a board image and print it at 100% scale:
 
@@ -70,6 +70,10 @@ The app also stores ARCore CPU-image intrinsics in each frame. If no calibration
 Copy the exported ZIP to the laptop, then run:
 
     python -m slam_pipeline process --session ../work/ie415_session.zip --map marker_map.json --out ../work/results/run_01
+
+Before processing, check the capture for missing images, tracking loss, timestamp ordering, sensor sample counts, and camera rate:
+
+    python -m slam_pipeline inspect --session ../work/ie415_session.zip
 
 Add --calibration camera_calibration.json if available. Open work/results/run_01/index.html for the report. The output includes:
 
@@ -118,3 +122,4 @@ Keep at least one independent reference route or surveyed point out of the corre
 
 See docs/IE415_CONTROL_CONNECTION.md for the state-estimation formulation and docs/DATA_FORMAT.md for the session schema.
 See docs/PROJECT_PLAN.md for requirement traceability, the five experiment protocol, milestone status, and the distinction between course requirements and supplementary research suggestions.
+Use docs/PHONE_RUN_CHECKLIST.md before field capture, docs/marker_survey_template.csv for the room map survey, docs/experiment_log_template.csv to record runs, and docs/FINAL_REPORT_TEMPLATE.md to prepare the report after collecting real data.

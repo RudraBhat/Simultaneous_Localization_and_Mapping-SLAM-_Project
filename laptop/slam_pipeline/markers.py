@@ -20,17 +20,32 @@ class MarkerMap:
     @classmethod
     def load(cls, path: Path) -> "MarkerMap":
         raw = json.loads(path.read_text(encoding="utf-8"))
+        marker_length_m = float(raw["marker_length_m"])
+        if not np.isfinite(marker_length_m) or marker_length_m <= 0:
+            raise ValueError("marker_length_m must be a positive finite value in metres.")
         transforms: dict[int, np.ndarray] = {}
         for marker in raw.get("markers", []):
+            marker_id = int(marker["id"])
+            if marker_id in transforms:
+                raise ValueError(f"Marker ID {marker_id} appears more than once in the map.")
             transform = np.asarray(marker["T_world_marker"], dtype=float)
             if transform.shape != (4, 4):
                 raise ValueError(f"Marker {marker['id']} must have a 4x4 T_world_marker.")
-            transforms[int(marker["id"])] = transform
+            if not np.all(np.isfinite(transform)):
+                raise ValueError(f"Marker {marker_id} has non-finite transform values.")
+            if not np.allclose(transform[3], [0.0, 0.0, 0.0, 1.0], atol=1e-6):
+                raise ValueError(f"Marker {marker_id} has an invalid homogeneous-transform last row.")
+            rotation = transform[:3, :3]
+            if not np.allclose(rotation.T @ rotation, np.eye(3), atol=1e-3) or not np.isclose(
+                np.linalg.det(rotation), 1.0, atol=1e-3
+            ):
+                raise ValueError(f"Marker {marker_id} rotation must be a proper orthonormal matrix.")
+            transforms[marker_id] = transform
         if not transforms:
             raise ValueError("The marker map has no known markers.")
         return cls(
             dictionary_name=raw.get("dictionary", "DICT_4X4_50"),
-            marker_length_m=float(raw["marker_length_m"]),
+            marker_length_m=marker_length_m,
             transforms=transforms,
             world_frame=raw.get("world_frame", "surveyed_room"),
         )

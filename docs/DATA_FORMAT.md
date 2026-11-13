@@ -30,3 +30,5 @@ An optional ground_truth.csv belongs inside the session directory and uses:
 The timestamps must use the phone session's monotonic clock. The recommended room frame has x and y on the floor and z upward. If a path was measured at discrete times, use those phone timestamps or document the interpolation method used for comparison.
 
 `marker_observations.csv` has one frame-level row. Its `relative_marker_poses_json` field contains each mapped marker observation as a JSON record with its ID and `T_camera_marker` 4x4 transform. The row also records multi-marker map-pose quality, filter decision, correction magnitude, and reason.
+
+`summary.json` includes the fraction of frames with active ARCore tracking, the fraction with at least one mapped marker, IMU sample counts/rates, an optional camera/gyro timing diagnostic, estimation runtime and processing rate, and baseline/corrected trajectory errors when ground truth is present. `python -m slam_pipeline inspect --session <zip>` checks image availability, timestamps, tracking, camera rate, and IMU counts before processing.

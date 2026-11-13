@@ -72,8 +72,10 @@ class MainActivity : Activity(), SensorEventListener {
                     if (frame.timestamp % 500_000_000L < 20_000_000L) {
                         val state = frame.camera.trackingState.name
                         runOnUiThread {
-                            statusView.text = "ARCore tracking: " + state +
-                                "  |  " + captureWriter.frameCount + " saved frames"
+                            statusView.text = "Tracking: " + state +
+                                "  |  camera: " + captureWriter.frameCount +
+                                "  |  accel: " + captureWriter.accelerometerSampleCount +
+                                "  |  gyro: " + captureWriter.gyroscopeSampleCount
                         }
                     }
                 },
@@ -194,10 +196,16 @@ class MainActivity : Activity(), SensorEventListener {
                 showError("This phone needs both an accelerometer and gyroscope.")
                 return
             }
-            sensorManager.registerListener(this, accel, 10_000)
-            sensorManager.registerListener(this, gyro, 10_000)
+            val accelRegistered = sensorManager.registerListener(this, accel, 10_000)
+            val gyroRegistered = sensorManager.registerListener(this, gyro, 10_000)
+            if (!accelRegistered || !gyroRegistered) {
+                sensorManager.unregisterListener(this)
+                captureWriter.stop()
+                showError("Android could not start both motion sensors for this session.")
+                return
+            }
             sensorListening = true
-            recordView.text = "Recording at about 10 camera frames/s; IMU samples are logged as they arrive."
+            recordView.text = "Recording camera, accelerometer, and gyroscope data."
             statusView.text = "Recording. Keep the phone in one camera mode and move smoothly."
         } catch (error: Exception) {
             showError("Could not start recording: " + error.message)
@@ -205,6 +213,10 @@ class MainActivity : Activity(), SensorEventListener {
     }
 
     private fun stopRecording() {
+        if (!captureWriter.isRecording) {
+            showError("There is no active recording to stop.")
+            return
+        }
         if (sensorListening) {
             sensorManager.unregisterListener(this)
             sensorListening = false
@@ -215,6 +227,10 @@ class MainActivity : Activity(), SensorEventListener {
     }
 
     private fun chooseExportLocation() {
+        if (captureWriter.isRecording) {
+            showError("Stop the recording before exporting its ZIP.")
+            return
+        }
         if (captureWriter.latestSessionDir == null) {
             showError("Record and stop a session before exporting.")
             return
@@ -264,6 +280,15 @@ class MainActivity : Activity(), SensorEventListener {
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
+
+    override fun onDestroy() {
+        try {
+            arSession?.close()
+        } catch (_: Exception) {
+        }
+        arSession = null
+        super.onDestroy()
+    }
 
     private fun showError(message: String) {
         statusView.text = message

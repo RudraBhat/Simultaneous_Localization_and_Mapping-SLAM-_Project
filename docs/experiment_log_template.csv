@@ -1,0 +1,6 @@
+experiment_id,session_zip,scenario,route_description,lighting_or_challenge,marker_ids_visible,calibration_file,ground_truth_method,ground_truth_independent,notes
+E1,,simple path,,,,,,,
+E2,,marker loss,,,,,,,
+E3,,closed loop,,,,,,,
+E4,,repeat run,,,,,,,
+E5,,difficult condition,,,,,,,
